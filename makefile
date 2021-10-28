@@ -25,6 +25,15 @@ test-widget:
 	go clean -testcache
 	go test ./...  -v -run TestAccDataSourceAppdService_basic
 
+test-health-rules:
+	go clean -testcache
+	go test ./...  -v -run TestAccAppDHealthRule
+
+dupa:
+	go clean -testcache
+	#go test ./...  -v -run TestAccAppDHealthRule_basicSingleMetricAllBtsMultipleCrit
+	go test ./...  -v -run TestAccAppDHealthRule_basicSingleMetricAllBtsSingleCrit
+
 test-appd-service:
 	go clean -testcache
 	go test ./...  -v -run TestAccDataSource

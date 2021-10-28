@@ -1,9 +1,13 @@
 package appdynamics
 
 import (
+	"fmt"
+	//"encoding/json"
 	"github.com/HarryEMartland/terraform-provider-appdynamics/appdynamics/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	//"reflect"
 	"strconv"
+	//"github.com/k0kubun/pp"
 )
 
 func resourceHealthRule() *schema.Resource {
@@ -21,6 +25,11 @@ func resourceHealthRule() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"schedule_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "Always",
 			},
 			"evaluation_minutes": {
 				Type:     schema.TypeInt,
@@ -52,7 +61,7 @@ func resourceHealthRule() *schema.Resource {
 			},
 			"business_transaction_scope": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ValidateFunc: validateList([]string{
 					"ALL_BUSINESS_TRANSACTIONS",
 					"SPECIFIC_BUSINESS_TRANSACTIONS",
@@ -60,70 +69,25 @@ func resourceHealthRule() *schema.Resource {
 					"BUSINESS_TRANSACTIONS_MATCHING_PATTERN",
 				}),
 			},
-			"evaluate_to_true_on_no_data": {
+			"business_transaction_scope_match": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validateList([]string{
+					"STARTS_WITH",
+					"ENDS_WITH",
+					"CONTAINS",
+					"EQUALS",
+					"MATCH_REG_EX",
+				}),
+			},
+			"business_transaction_scope_match_value": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"business_transaction_scope_match_negation": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
-			},
-			"warn_compare_value": {
-				Type:     schema.TypeFloat,
-				Required: true,
-			},
-			"critical_compare_value": {
-				Type:     schema.TypeFloat,
-				Required: true,
-			},
-			"eval_detail_type": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"metric_aggregation_function": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"metric_path": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"metric_eval_detail_type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ValidateFunc: validateList([]string{
-					"SINGLE_METRIC",
-					"METRIC_EXPRESSION",
-					"BASELINE_TYPE",
-					"SPECIFIC_TYPE",
-				}),
-			},
-			"baseline_condition": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validateList([]string{
-					"WITHIN_BASELINE",
-					"NOT_WITHIN_BASELINE",
-					"GREATER_THAN_BASELINE",
-					"LESS_THAN_BASELINE",
-				}),
-			},
-			"baseline_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"baseline_unit": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validateList([]string{
-					"STANDARD_DEVIATIONS",
-					"PERCENTAGE",
-				}),
-			},
-			"compare_condition": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validateList([]string{
-					"GREATER_THAN_SPECIFIC_VALUE",
-					"LESS_THAN_SPECIFIC_VALUE",
-				}),
 			},
 			"business_transactions": {
 				Type:     schema.TypeSet,
@@ -137,6 +101,184 @@ func resourceHealthRule() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
+				},
+			},
+			"warning_condition_aggregation_type": {
+				Type: schema.TypeString,
+				Optional: true,
+				Default: "ALL",
+				ValidateFunc: validateList([]string{
+					"ALL",
+					"ANY",
+				}),
+			},
+			"warning_criteria": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"shortname": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"evaluate_to_true_on_no_data": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"eval_detail_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ValidateFunc: validateList([]string{
+								"SINGLE_METRIC",
+								"METRIC_EXPRESSION",
+							}),
+						},
+						"metric_aggregation_function": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"metric_path": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"metric_eval_detail_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ValidateFunc: validateList([]string{
+								"SINGLE_METRIC",
+								"METRIC_EXPRESSION",
+								"BASELINE_TYPE",
+								"SPECIFIC_TYPE",
+							}),
+						},
+						"baseline_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"baseline_condition": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ValidateFunc: validateList([]string{
+								"WITHIN_BASELINE",
+								"NOT_WITHIN_BASELINE",
+								"GREATER_THAN_BASELINE",
+								"LESS_THAN_BASELINE",
+							}),
+						},
+						"baseline_unit": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ValidateFunc: validateList([]string{
+								"STANDARD_DEVIATIONS",
+								"PERCENTAGE",
+							}),
+						},
+						"compare_condition": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ValidateFunc: validateList([]string{
+								"GREATER_THAN_SPECIFIC_VALUE",
+								"LESS_THAN_SPECIFIC_VALUE",
+							}),
+						},
+						"compare_value": {
+							Type:     schema.TypeFloat,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"critical_condition_aggregation_type": {
+				Type: schema.TypeString,
+				Optional: true,
+				Default: "ALL",
+				ValidateFunc: validateList([]string{
+					"ALL",
+					"ANY",
+				}),
+			},
+			"critical_criteria": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"shortname": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"evaluate_to_true_on_no_data": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"eval_detail_type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validateList([]string{
+								"SINGLE_METRIC",
+								"METRIC_EXPRESSION",
+							}),
+						},
+						"metric_aggregation_function": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"metric_path": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"metric_eval_detail_type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validateList([]string{
+								"BASELINE_TYPE",
+								"SPECIFIC_TYPE",
+							}),
+						},
+						"baseline_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"baseline_condition": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ValidateFunc: validateList([]string{
+								"WITHIN_BASELINE",
+								"NOT_WITHIN_BASELINE",
+								"GREATER_THAN_BASELINE",
+								"LESS_THAN_BASELINE",
+							}),
+						},
+						"baseline_unit": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ValidateFunc: validateList([]string{
+								"STANDARD_DEVIATIONS",
+								"PERCENTAGE",
+							}),
+						},
+						"compare_condition": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ValidateFunc: validateList([]string{
+								"GREATER_THAN_SPECIFIC_VALUE",
+								"LESS_THAN_SPECIFIC_VALUE",
+							}),
+						},
+						"compare_value": {
+							Type:     schema.TypeFloat,
+							Required: true,
+						},
+					},
 				},
 			},
 		},
@@ -177,32 +319,151 @@ func GetOrNilL(d *schema.ResourceData, key string) *[]interface{} {
 	return nil
 }
 
+func defineMetricEvalDetail(metricEvalDetailType string, baselineCondition string, baselineName string, baselineUnit string, compareValue float64, compareCondition string) client.MetricEvalDetail {
+	return client.MetricEvalDetail{
+		MetricEvalDetailType: metricEvalDetailType,
+		BaselineCondition:    baselineCondition,
+		BaselineName:         baselineName,
+		BaselineUnit:         baselineUnit,
+		CompareValue:         compareValue,
+		CompareCondition:     compareCondition,
+	}
+}
+
+func defineEvalDetail(evalDetailType string, metricAggregationFunction string, metricPath string, metricEvalDetail *client.MetricEvalDetail) client.EvalDetail {
+	return client.EvalDetail{
+		EvalDetailType:          evalDetailType,
+		MetricAggregateFunction: metricAggregationFunction,
+		MetricPath:              metricPath,
+		MetricEvalDetail:        metricEvalDetail,
+	}
+}
+
+func defineCondition(name string, shortName string, evaluateToTrueOnNoData bool, evalDetail *client.EvalDetail) client.Condition {
+	return client.Condition{
+		Name:                   name,
+		ShortName:              shortName,
+		EvaluateToTrueOnNoData: evaluateToTrueOnNoData,
+		EvalDetail:             evalDetail,
+	}
+}
+
+func conditionsOrNil(conditions []*client.Condition, conditionAggregationType string) *client.Criteria {
+	if len(conditions) == 0 {
+		return nil
+	}
+
+	tmp := client.Criteria{
+		ConditionAggregationType: conditionAggregationType,
+		Conditions:               conditions,
+	}
+
+	return &tmp
+
+}
+
 func createHealthRule(d *schema.ResourceData) client.HealthRule {
 
 	name := d.Get("name").(string)
+	scheduleName := d.Get("schedule_name").(string)
 	evaluationMinutes := d.Get("evaluation_minutes").(int)
 	violationLengthMinutes := d.Get("violation_length_minutes").(int)
 
 	affectedEntityType := d.Get("affected_entity_type").(string)
 	businessTransactionScope := d.Get("business_transaction_scope").(string)
 
-	evaluateToTrueOnNoData := d.Get("evaluate_to_true_on_no_data").(bool)
+	/*
+	   evaluateToTrueOnNoData := d.Get("evaluate_to_true_on_no_data").(bool)
 
-	evalDetailType := d.Get("eval_detail_type").(string)
-	metricAggregationFunction := d.Get("metric_aggregation_function").(string)
-	metricPath := d.Get("metric_path").(string)
-	criticalCompareValue := d.Get("critical_compare_value").(float64)
-	compareCondition := GetOrNilS(d, "compare_condition")
-	warnCompareValue := d.Get("warn_compare_value").(float64)
-	metricEvalDetailType := d.Get("metric_eval_detail_type").(string)
+	   evalDetailType := d.Get("eval_detail_type").(string)
+	   metricAggregationFunction := d.Get("metric_aggregation_function").(string)
+	   metricPath := d.Get("metric_path").(string)
+	   compareValue := d.Get("critical_compare_value").(float64)
+	   compareCondition := GetOrNilS(d, "compare_condition")
+	   //warnCompareValue := d.Get("warn_compare_value").(float64)
+	   metricEvalDetailType := d.Get("metric_eval_detail_type").(string)
 
-	baselineCondition := GetOrNilS(d, "baseline_condition")
-	baselineName := GetOrNilS(d, "baseline_name")
-	baselineUnit := GetOrNilS(d, "baseline_unit")
+	   baselineCondition := GetOrNilS(d, "baseline_condition")
+	   baselineName := GetOrNilS(d, "baseline_name")
+	   baselineUnit := GetOrNilS(d, "baseline_unit")
+	*/
+
+	criticalCriteria := d.Get("critical_criteria").([]interface{})
+	warningCriteria := d.Get("warning_criteria").([]interface{})
+	criticalConditionAggregationType := d.Get("critical_condition_aggregation_type").(string)
+	warningConditionAggregationType := d.Get("warning_condition_aggregation_type").(string)
+
+	var criticalConditions []*client.Condition
+	var warningConditions []*client.Condition
+
+	for _, tmpCriteria := range criticalCriteria {
+
+		criteria := tmpCriteria.(map[string]interface{})
+
+		critName := criteria["name"].(string)
+		shortname := criteria["shortname"].(string)
+		evaluateToTrueOnNoData := criteria["evaluate_to_true_on_no_data"].(bool)
+		evalDetailType := criteria["eval_detail_type"].(string)
+		metricAggregationFunction := criteria["metric_aggregation_function"].(string)
+		metricPath := criteria["metric_path"].(string)
+		metricEvalDetailType := criteria["metric_eval_detail_type"].(string)
+		baselineCondition := criteria["baseline_name"].(string)
+		baselineName := criteria["baseline_condition"].(string)
+		baselineUnit := criteria["baseline_unit"].(string)
+		compareCondition := criteria["compare_condition"].(string)
+		compareValue := criteria["compare_value"].(float64)
+
+		metricEvalDetail := defineMetricEvalDetail(metricEvalDetailType, baselineCondition, baselineName, baselineUnit, compareValue, compareCondition)
+		evalDetail := defineEvalDetail(evalDetailType, metricAggregationFunction, metricPath, &metricEvalDetail)
+		condition := defineCondition(critName, shortname, evaluateToTrueOnNoData, &evalDetail)
+
+		criticalConditions = append(criticalConditions, &condition)
+	}
+
+	for _, tmpCriteria := range warningCriteria {
+
+		criteria := tmpCriteria.(map[string]interface{})
+
+		critName := criteria["name"].(string)
+		shortname := criteria["shortname"].(string)
+		evaluateToTrueOnNoData := criteria["evaluate_to_true_on_no_data"].(bool)
+		evalDetailType := criteria["eval_detail_type"].(string)
+		metricAggregationFunction := criteria["metric_aggregation_function"].(string)
+		metricPath := criteria["metric_path"].(string)
+		metricEvalDetailType := criteria["metric_eval_detail_type"].(string)
+		baselineCondition := criteria["baseline_name"].(string)
+		baselineName := criteria["baseline_condition"].(string)
+		baselineUnit := criteria["baseline_unit"].(string)
+		compareCondition := criteria["compare_condition"].(string)
+		compareValue := criteria["compare_value"].(float64)
+
+		metricEvalDetail := defineMetricEvalDetail(metricEvalDetailType, baselineCondition, baselineName, baselineUnit, compareValue, compareCondition)
+		evalDetail := defineEvalDetail(evalDetailType, metricAggregationFunction, metricPath, &metricEvalDetail)
+		condition := defineCondition(critName, shortname, evaluateToTrueOnNoData, &evalDetail)
+
+		warningConditions = append(warningConditions, &condition)
+
+	}
+
+	/*
+	   criticalCriterias := client.Criteria{
+	       ConditionAggregationType: "ALL",
+	       Conditions:               criticalConditions,
+	   }
+	   warningCriterias := client.Criteria{
+	       ConditionAggregationType: "ALL",
+	       Conditions:               warningConditions,
+	   }
+	*/
+	criterias := client.Criterias{
+		Critical: conditionsOrNil(criticalConditions, criticalConditionAggregationType),
+		Warning:  conditionsOrNil(warningConditions, warningConditionAggregationType),
+	}
 
 	healthRule := client.HealthRule{
 		Name:                    name,
 		Enabled:                 true,
+		ScheduleName:            scheduleName,
 		UseDataFromLastNMinutes: evaluationMinutes,
 		WaitTimeAfterViolation:  violationLengthMinutes,
 		Affects: &client.Affects{
@@ -213,51 +474,9 @@ func createHealthRule(d *schema.ResourceData) client.HealthRule {
 				SpecificTiers:            GetOrNilL(d, "specific_tiers"),
 			},
 		},
-		Criterias: &client.Criterias{
-			Critical: &client.Criteria{
-				ConditionAggregationType: "ALL",
-				Conditions: []*client.Condition{{
-					Name:                   name,
-					ShortName:              "A",
-					EvaluateToTrueOnNoData: evaluateToTrueOnNoData,
-					EvalDetail: &client.EvalDetail{
-						EvalDetailType:          evalDetailType,
-						MetricAggregateFunction: metricAggregationFunction,
-						MetricPath:              metricPath,
-						MetricEvalDetail: &client.MetricEvalDetail{
-							MetricEvalDetailType: metricEvalDetailType,
-							BaselineCondition:    baselineCondition,
-							BaselineName:         baselineName,
-							BaselineUnit:         baselineUnit,
-							CompareValue:         criticalCompareValue,
-							CompareCondition:     compareCondition,
-						},
-					},
-				}},
-			},
-			Warning: &client.Criteria{
-				ConditionAggregationType: "ALL",
-				Conditions: []*client.Condition{{
-					Name:                   name,
-					ShortName:              "A",
-					EvaluateToTrueOnNoData: evaluateToTrueOnNoData,
-					EvalDetail: &client.EvalDetail{
-						EvalDetailType:          evalDetailType,
-						MetricAggregateFunction: metricAggregationFunction,
-						MetricPath:              metricPath,
-						MetricEvalDetail: &client.MetricEvalDetail{
-							MetricEvalDetailType: metricEvalDetailType,
-							BaselineCondition:    baselineCondition,
-							BaselineName:         baselineName,
-							BaselineUnit:         baselineUnit,
-							CompareValue:         warnCompareValue,
-							CompareCondition:     compareCondition,
-						},
-					},
-				}},
-			},
-		},
+		Criterias: &criterias,
 	}
+
 	return healthRule
 }
 
@@ -282,22 +501,52 @@ func resourceHealthRuleRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func updateHealthRule(d *schema.ResourceData, healthRule *client.HealthRule) {
+
 	d.Set("name", healthRule.Name)
+	d.Set("schedule_name", healthRule.ScheduleName)
 	d.Set("evaluation_minutes", healthRule.UseDataFromLastNMinutes)
 	d.Set("violation_length_minutes", healthRule.WaitTimeAfterViolation)
 	d.Set("affected_entity_type", healthRule.Affects.AffectedEntityType)
 	d.Set("business_transaction_scope", healthRule.Affects.AffectedBusinessTransactions.BusinessTransactionScope)
-	criticalCondition := healthRule.Criterias.Critical.Conditions[0]
-	d.Set("evaluate_to_true_on_no_data", criticalCondition.EvaluateToTrueOnNoData)
-	d.Set("eval_detail_type", criticalCondition.EvalDetail.EvalDetailType)
-	d.Set("metric_aggregation_function", criticalCondition.EvalDetail.MetricAggregateFunction)
-	d.Set("metric_path", criticalCondition.EvalDetail.MetricPath)
-	d.Set("critical_compare_value", criticalCondition.EvalDetail.MetricEvalDetail.CompareValue)
-	d.Set("warn_compare_value", healthRule.Criterias.Warning.Conditions[0].EvalDetail.MetricEvalDetail.CompareValue)
-	d.Set("metric_eval_detail_type", criticalCondition.EvalDetail.MetricEvalDetail.MetricEvalDetailType)
-	d.Set("baseline_condition", criticalCondition.EvalDetail.MetricEvalDetail.BaselineCondition)
-	d.Set("baseline_name", criticalCondition.EvalDetail.MetricEvalDetail.BaselineName)
-	d.Set("baseline_unit", criticalCondition.EvalDetail.MetricEvalDetail.BaselineUnit)
+	d.Set("business_transaction_scope_match", healthRule.Affects.AffectedBusinessTransactions.SpecificTiers)
+
+	if healthRule.Criterias.Critical != nil {
+		for i, _ := range healthRule.Criterias.Critical.Conditions {
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".name", healthRule.Criterias.Critical.Conditions[i].Name)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".shortname", healthRule.Criterias.Critical.Conditions[i].ShortName)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".evaluate_to_true_on_no_data", healthRule.Criterias.Critical.Conditions[i].EvaluateToTrueOnNoData)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".eval_detail_type", healthRule.Criterias.Critical.Conditions[i].EvalDetail.EvalDetailType)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".metric_aggregation_function", healthRule.Criterias.Critical.Conditions[i].EvalDetail.MetricAggregateFunction)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".metric_path", healthRule.Criterias.Critical.Conditions[i].EvalDetail.MetricPath)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".metric_eval_detail_type", healthRule.Criterias.Critical.Conditions[i].EvalDetail.MetricEvalDetail.MetricEvalDetailType)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".baseline_name", healthRule.Criterias.Critical.Conditions[i].EvalDetail.MetricEvalDetail.BaselineName)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".baseline_condition", healthRule.Criterias.Critical.Conditions[i].EvalDetail.MetricEvalDetail.BaselineCondition)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".baseline_unit", healthRule.Criterias.Critical.Conditions[i].EvalDetail.MetricEvalDetail.BaselineUnit)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".compare_condition", healthRule.Criterias.Critical.Conditions[i].EvalDetail.MetricEvalDetail.CompareCondition)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".compare_value", healthRule.Criterias.Critical.Conditions[i].EvalDetail.MetricEvalDetail.CompareValue)
+		}
+
+		//d.Set("critical_criteria", healthRule.Criterias.Critical.Conditions)
+	}
+	if healthRule.Criterias.Warning != nil {
+		for i, _ := range healthRule.Criterias.Warning.Conditions {
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".name", healthRule.Criterias.Warning.Conditions[i].Name)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".shortname", healthRule.Criterias.Warning.Conditions[i].ShortName)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".evaluate_to_true_on_no_data", healthRule.Criterias.Warning.Conditions[i].EvaluateToTrueOnNoData)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".eval_detail_type", healthRule.Criterias.Warning.Conditions[i].EvalDetail.EvalDetailType)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".metric_aggregation_function", healthRule.Criterias.Warning.Conditions[i].EvalDetail.MetricAggregateFunction)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".metric_path", healthRule.Criterias.Warning.Conditions[i].EvalDetail.MetricPath)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".metric_eval_detail_type", healthRule.Criterias.Warning.Conditions[i].EvalDetail.MetricEvalDetail.MetricEvalDetailType)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".baseline_name", healthRule.Criterias.Warning.Conditions[i].EvalDetail.MetricEvalDetail.BaselineName)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".baseline_condition", healthRule.Criterias.Warning.Conditions[i].EvalDetail.MetricEvalDetail.BaselineCondition)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".baseline_unit", healthRule.Criterias.Warning.Conditions[i].EvalDetail.MetricEvalDetail.BaselineUnit)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".compare_condition", healthRule.Criterias.Warning.Conditions[i].EvalDetail.MetricEvalDetail.CompareCondition)
+			d.Set("critical_criteria." + fmt.Sprint(i) + ".compare_value", healthRule.Criterias.Warning.Conditions[i].EvalDetail.MetricEvalDetail.CompareValue)
+		}
+
+		//d.Set("warning_criteria", healthRule.Criterias.Warning.Conditions)
+	}
+
 }
 
 func resourceHealthRuleUpdate(d *schema.ResourceData, m interface{}) error {

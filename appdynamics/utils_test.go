@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	//"github.com/k0kubun/pp"
 )
 
 var appDClient client.AppDClient
@@ -46,6 +47,18 @@ func init() {
 	tier2 = os.Getenv("APPD_TIER2")
 	accountId = os.Getenv("APPD_ACCOUNT_ID")
 	scopeId = os.Getenv("APPD_SCOPE_ID")
+/*
+	pp.Print(appDClient.GetHealthRule(261766, 766))
+	pp.Print(appDClient.GetHealthRule(261767, 766))
+	pp.Print(appDClient.GetHealthRule(261768, 766))
+	pp.Print(appDClient.GetHealthRule(261769, 766))
+	pp.Print(appDClient.GetHealthRule(261770, 766))
+	pp.Print(appDClient.GetHealthRule(261771, 766))
+	pp.Print(appDClient.GetHealthRule(261772, 766))
+	pp.Print(appDClient.GetHealthRule(261773, 766))
+	pp.Print(appDClient.GetHealthRule(261774, 766))
+*/
+
 }
 
 func TestValidateListShouldReturnNoErrsOrWarnsWhenIsValid(t *testing.T) {

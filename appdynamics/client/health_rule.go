@@ -1,9 +1,12 @@
 package client
 
 import (
+	//"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/imroc/req"
+	//"github.com/k0kubun/pp"
+	//"reflect"
 )
 
 func (c *AppDClient) CreateHealthRule(healthRule *HealthRule, applicationId int) (*HealthRule, error) {
@@ -15,7 +18,6 @@ func (c *AppDClient) CreateHealthRule(healthRule *HealthRule, applicationId int)
 
 	if resp.Response().StatusCode != 201 {
 		respString, _ := resp.ToString()
-
 		return nil, errors.New(fmt.Sprintf("Error creating Health Rule: %d, %s", resp.Response().StatusCode, respString))
 	}
 
@@ -66,6 +68,8 @@ func (c *AppDClient) GetHealthRule(healthRuleId int, applicationId int) (*Health
 		return nil, err
 	}
 
+	fmt.Sprintf("%s\n", resp)
+
 	if resp.Response().StatusCode != 200 {
 		respString, _ := resp.ToString()
 		return nil, errors.New(fmt.Sprintf("Error getting Health TransactionRule: %d, %s, %s", resp.Response().StatusCode, c.createHealthRuleUrl(healthRuleId, applicationId), respString))
@@ -92,6 +96,7 @@ type HealthRule struct {
 	ID                      int        `json:"id"`
 	Name                    string     `json:"name"`
 	Enabled                 bool       `json:"enabled"`
+	ScheduleName            string     `json:"scheduleName"`
 	UseDataFromLastNMinutes int        `json:"useDataFromLastNMinutes"`
 	WaitTimeAfterViolation  int        `json:"waitTimeAfterViolation"`
 	Affects                 *Affects   `json:"affects"`
@@ -124,11 +129,11 @@ type EvalDetail struct {
 
 type MetricEvalDetail struct {
 	MetricEvalDetailType string  `json:"metricEvalDetailType"`
-	BaselineCondition    *string `json:"baselineCondition"`
-	BaselineName         *string `json:"baselineName"`
-	BaselineUnit         *string `json:"baselineUnit"`
+	BaselineCondition    string  `json:"baselineCondition"`
+	BaselineName         string  `json:"baselineName"`
+	BaselineUnit         string  `json:"baselineUnit"`
 	CompareValue         float64 `json:"compareValue"`
-	CompareCondition     *string `json:"compareCondition"`
+	CompareCondition     string  `json:"compareCondition"`
 }
 
 type Affects struct {
