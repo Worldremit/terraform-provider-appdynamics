@@ -41,6 +41,10 @@ test-associations:
 	go clean -testcache
 	go test ./...  -v -run TestAccTierTemplateAssociation_Create
 
+test-collector-create:
+	go clean -testcache
+	go test ./...  -v -run TestAccAppDCollector_Create
+
 install:
 	go get
 
