@@ -2,14 +2,15 @@ package client
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
 func TestCollector(t *testing.T) {
 	fmt.Println("Testing colllector")
 
-	baseURL := "" //os.Getenv("worldremit-production_2db6e402-09cb-4a7d-8a9a-0a60a7cc0c89")
-	secret := ""  //os.Getenv("APPD_SECRET")
+	baseURL := os.Getenv("APPD_BASE_URL")
+	secret := os.Getenv("APPD_COLLECTOR_SECRET")
 
 	client := AppDClient{
 		BaseUrl: baseURL,
@@ -17,19 +18,19 @@ func TestCollector(t *testing.T) {
 	}
 
 	// fmt.Println(client)
-	collector, err := client.CreateCollector(Collector{
-		Name:      "name",
-		Type:      "type",
+	id, err := client.CreateCollector(&Collector{
+		Name:      "dummytest-nameaaaa6",
+		Type:      "MYSQL",
 		Hostname:  "host",
-		Port:      33,
+		Port:      "33",
 		Username:  "aaa",
 		Password:  "bb",
-		AgentName: "fake",
+		AgentName: "dbagent",
 	})
 
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()
 	}
-	fmt.Println(collector)
+	fmt.Printf("Success %v", id)
 }

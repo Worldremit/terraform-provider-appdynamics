@@ -8,9 +8,9 @@ import (
 func resourceCollector() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceCollectorCreate,
-		//		Read:   resourceCollectorRead,
-		//		Update: resourceCollectorUpdate,
-		//		Delete: resourceCollectorDelete,
+		Read:   resourceCollectorRead,
+		//Update: resourceCollectorUpdate,
+		//Delete: resourceCollectorDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -46,23 +46,23 @@ func resourceCollectorCreate(d *schema.ResourceData, m interface{}) error {
 
 	collector := createCollector(d)
 
-	createdCollector, err := appdClient.CreateCollector(&collector)
+	id, err := appdClient.CreateCollector(&collector)
 	if err != nil {
 		return err
 	}
+	//TODO change it
+	d.SetId(id)
 
-	d.SetId(createdCollector.id)
-
-	return //resourceCollectorRead(d, m)
+	return nil
 }
 
 func createCollector(d *schema.ResourceData) client.Collector {
 
-	collector := client.C{
+	collector := client.Collector{
 		Name:      d.Get("name").(string),
 		Type:      d.Get("type").(string),
 		Hostname:  d.Get("hostname").(string),
-		Port:      d.Get("port").(int),
+		Port:      d.Get("port").(string),
 		Username:  d.Get("username").(string),
 		Password:  d.Get("password").(string),
 		AgentName: d.Get("agentName").(string),
@@ -70,7 +70,6 @@ func createCollector(d *schema.ResourceData) client.Collector {
 	return collector
 }
 
-/*
 func resourceCollectorRead(d *schema.ResourceData, m interface{}) error {
 	appdClient := m.(*client.AppDClient)
 	applicationId := d.Get("application_id").(int)
@@ -90,4 +89,3 @@ func resourceCollectorRead(d *schema.ResourceData, m interface{}) error {
 
 	return nil
 }
-*/

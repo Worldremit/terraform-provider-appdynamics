@@ -1,32 +1,44 @@
 package appdynamics
 
 import (
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"testing"
 )
 
 func TestAccAppDCollector_Create(t *testing.T) {
 
-	// fmt.Println("The string is")
+	fmt.Println("The string is")
 
-	// resource.Test(t, resource.TestCase{
-	// 	Providers: map[string]terraform.ResourceProvider{
-	// 		"appdynamics": Provider(),
-	// 	},
+	resource.Test(t, resource.TestCase{
+		Providers: map[string]terraform.ResourceProvider{
+			"appdynamics": Provider(),
+		},
 
-	// 	Steps: []resource.TestStep{
-	// 		{
-	// 			Config: smsAction(phoneNumber),
-	// 			Check:  resource.ComposeAggregateTestCheckFunc(
-	// 			//					resource.TestCheckResourceAttr(resourceName, "phone_number", phoneNumber),
-	// 			//					resource.TestCheckResourceAttr(resourceName, "action_type", "SMS"),
-	// 			//					resource.TestCheckResourceAttr(resourceName, "application_id", applicationIdS),
-	// 			//					resource.TestCheckResourceAttrSet(resourceName, "id"),
-	// 			//					CheckActionExists(resourceName),
-	// 			),
-	// 		},
-	// 	},
-	// 	CheckDestroy: CheckActionDoesNotExist(resourceName),
-	// })
+		Steps: []resource.TestStep{
+			{
+				Config: `
+
+resource collector test {
+	name="testAutomation"
+	type="MYSQL"
+	hostname="test"
+	port="3306"
+	agentName="test"
+}
+`,
+				Check: resource.ComposeAggregateTestCheckFunc(
+				//					resource.TestCheckResourceAttr(resourceName, "phone_number", phoneNumber),
+				//					resource.TestCheckResourceAttr(resourceName, "action_type", "SMS"),
+				//					resource.TestCheckResourceAttr(resourceName, "application_id", applicationIdS),
+				//					resource.TestCheckResourceAttrSet(resourceName, "id"),
+				//					CheckActionExists(resourceName),
+				),
+			},
+		},
+		CheckDestroy: CheckActionDoesNotExist(resourceName),
+	})
 }
 
 /*
