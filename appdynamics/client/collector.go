@@ -3,8 +3,9 @@ package client
 import (
 	"errors"
 	"fmt"
-	"github.com/imroc/req"
 	"strings"
+
+	"github.com/imroc/req"
 )
 
 type Collector struct {
@@ -43,12 +44,12 @@ func (c *AppDClient) CreateCollector(collector *Collector) (string, error) {
 	body := req.BodyJSON(collector)
 	req.Debug = true
 	resp, err := req.Post(url, auth, body)
+	if err != nil {
+		return "", err
+	}
 	if resp.Response().StatusCode != 201 {
 		respString, _ := resp.ToString()
 		return "", errors.New(fmt.Sprintf("Error creating Collector: %d, %s\nurl=[%s]", resp.Response().StatusCode, respString, c.createCollectorUrl()))
-	}
-	if err != nil {
-		return "", err
 	}
 	//eg.  http://worldremit-test.saas.appdynamics.com/controller/rest/databases/collectors/create/1540
 	locationHeader := resp.Response().Header.Get("Location")
@@ -59,13 +60,13 @@ func (c *AppDClient) CreateCollector(collector *Collector) (string, error) {
 }
 
 func (c *AppDClient) DeleteCollector(collectorId int) error {
-	resp, err := req.Post(c.deleteCollectorUrl(collectorId), c.createAuthHeader(), req.BodyJSON(collectorId))
+	resp, err := req.Delete(c.deleteCollectorUrl(collectorId), c.createAuthHeader())
 	if err != nil {
 		return err
 	}
-	if resp.Response().StatusCode != 204 {
+	if resp.Response().StatusCode != 200 {
 		respString, _ := resp.ToString()
-		return errors.New(fmt.Sprintf("Error deleting Dashboard: %d, %s", resp.Response().StatusCode, respString))
+		return errors.New(fmt.Sprintf("Error deleting Collector: %d, %s", resp.Response().StatusCode, respString))
 	}
 	return nil
 }

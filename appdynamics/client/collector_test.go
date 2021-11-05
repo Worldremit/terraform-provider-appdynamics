@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 )
 
@@ -19,7 +20,7 @@ func TestCollector(t *testing.T) {
 
 	// fmt.Println(client)
 	id, err := client.CreateCollector(&Collector{
-		Name:      "dummytest-nameaaaa6",
+		Name:      "dummytest-nameaaaa9",
 		Type:      "MYSQL",
 		Hostname:  "host",
 		Port:      "33",
@@ -32,5 +33,17 @@ func TestCollector(t *testing.T) {
 		fmt.Println(err)
 		t.Fail()
 	}
-	fmt.Printf("Success %v", id)
+	fmt.Printf("Successfully created collector id = %v \n", id)
+
+	id1, _ := strconv.Atoi(id)
+
+	err1 := client.DeleteCollector(id1)
+
+	if err1 != nil {
+		fmt.Println(err1)
+		t.Fail()
+	}
+
+	fmt.Printf("Successfully deleted collector id = %v \n", id1)
+
 }
