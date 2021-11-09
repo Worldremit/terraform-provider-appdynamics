@@ -1,9 +1,10 @@
 package appdynamics
 
 import (
+	"strconv"
+
 	"github.com/HarryEMartland/terraform-provider-appdynamics/appdynamics/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"strconv"
 )
 
 func resourceCollector() *schema.Resource {
@@ -22,8 +23,16 @@ func resourceCollector() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validateList([]string{
-					"MYSQL",
+					"COUCHBASE",
+					"CASSANDRA",
+					"DB2",
 					"MONGO",
+					"MSSQL",
+					"MYSQL",
+					"ORACLE",
+					"POSTGRESQL",
+					"SYBASE",
+					"SQLAZURE",
 				}),
 			},
 			"hostname": {
