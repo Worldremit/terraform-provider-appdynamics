@@ -73,7 +73,7 @@ func (c *AppDClient) DeleteCollector(collectorId int) error {
 
 func (c *AppDClient) UpdateCollector(collector Collector) (*Collector, error) {
 	req.Debug = true
-	resp, err := req.Post(c.getCollectorUrl(collector.ID), c.createAuthHeader(), req.BodyJSON(collector))
+	resp, err := req.Post(c.updateCollectorUrl(), c.createAuthHeader(), req.BodyJSON(collector))
 	if resp.Response().StatusCode != 200 {
 		respString, _ := resp.ToString()
 		return nil, errors.New(fmt.Sprintf("Error updating Collector: %d, %s", resp.Response().StatusCode, respString))
