@@ -17,6 +17,7 @@ type Collector struct {
 	Username  string `json:"username"`
 	Password  string `json:"password"`
 	AgentName string `json:"agentName"`
+	Enabled   bool   `json:"enabled"`
 }
 
 func (c *AppDClient) createCollectorBaseUrl() string {
