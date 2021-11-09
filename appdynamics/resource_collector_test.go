@@ -37,13 +37,13 @@ resource appdynamics_collector test {
 	agent_name="test"
 }
 `, os.Getenv("APPD_SECRET"), os.Getenv("APPD_CONTROLLER_BASE_URL")),
-				//Check: resource.ComposeAggregateTestCheckFunc(
-				////					resource.TestCheckResourceAttr(resourceName, "phone_number", phoneNumber),
-				////					resource.TestCheckResourceAttr(resourceName, "action_type", "SMS"),
-				////					resource.TestCheckResourceAttr(resourceName, "application_id", applicationIdS),
-				////					resource.TestCheckResourceAttrSet(resourceName, "id"),
-				//					CheckCollectorExists(resourceName),
-				//),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", "testAutomation"),
+					resource.TestCheckResourceAttr(resourceName, "type", "MYSQL"),
+					resource.TestCheckResourceAttr(resourceName, "hostname", "test"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					CheckCollectorExists(resourceName),
+				),
 			},
 		},
 		CheckDestroy: CheckCollectorDoesNotExist(resourceName),
