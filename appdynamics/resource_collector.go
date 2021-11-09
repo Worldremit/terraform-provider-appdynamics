@@ -82,7 +82,6 @@ func createCollector(d *schema.ResourceData) client.Collector {
 
 func resourceCollectorUpdate(d *schema.ResourceData, m interface{}) error {
 	appdClient := m.(*client.AppDClient)
-	applicationId := d.Get("application_id").(int)
 	id := d.Id()
 
 	actionId, err := strconv.Atoi(id)
@@ -90,12 +89,12 @@ func resourceCollectorUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	action, err := appdClient.GetAction(actionId, applicationId)
+	collector, err := appdClient.GetCollector(actionId)
 	if err != nil {
 		return err
 	}
 
-	updateAction(d, *action)
+	updateCollector(d, *collector)
 
 	return nil
 }
