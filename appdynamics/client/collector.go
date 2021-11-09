@@ -9,10 +9,11 @@ import (
 )
 
 type Collector struct {
+	ID        int    `json:"id"`
 	Name      string `json:"name"`
 	Type      string `json:"type"`
 	Hostname  string `json:"hostname"`
-	Port      string `json:"port"`
+	Port      int    `json:"port"`
 	Username  string `json:"username"`
 	Password  string `json:"password"`
 	AgentName string `json:"agentName"`
@@ -86,23 +87,22 @@ func (c *AppDClient) UpdateCollector(dashboard Dashboard) (*Dashboard, error) {
 	return &updated, err
 }
 
+*/
 
-
-func (c *AppDClient) GetCollector(dashboardId int) (*Dashboard, error) {
-	resp, err := req.Get(c.getDashboardUrl(dashboardId), c.createAuthHeader())
+func (c *AppDClient) GetCollector(collectorId int) (*Collector, error) {
+	resp, err := req.Get(c.getCollectorUrl(collectorId), c.createAuthHeader())
 	if err != nil {
 		return nil, err
 	}
 	if resp.Response().StatusCode != 200 {
 		respString, _ := resp.ToString()
-		return nil, errors.New(fmt.Sprintf("Error getting dashboard: %d, %s", resp.Response().StatusCode, respString))
+		return nil, errors.New(fmt.Sprintf("Error getting collector: %d, %s", resp.Response().StatusCode, respString))
 	}
-	dashboard := Dashboard{}
-	err = resp.ToJSON(&dashboard)
+	collector := Collector{}
+	err = resp.ToJSON(&collector)
 	if err != nil {
 		return nil, err
 	}
-	dashboard.ID = dashboardId
-	return &dashboard, nil
+	collector.ID = collectorId //TODO Remove this line
+	return &collector, nil
 }
-*/

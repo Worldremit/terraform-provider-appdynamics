@@ -23,7 +23,7 @@ func TestCollector(t *testing.T) {
 		Name:      "dummytest-nameaaaa9",
 		Type:      "MYSQL",
 		Hostname:  "host",
-		Port:      "33",
+		Port:      33,
 		Username:  "aaa",
 		Password:  "bb",
 		AgentName: "dbagent",

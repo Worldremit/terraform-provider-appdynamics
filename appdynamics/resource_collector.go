@@ -3,14 +3,15 @@ package appdynamics
 import (
 	"github.com/HarryEMartland/terraform-provider-appdynamics/appdynamics/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"strconv"
 )
 
 func resourceCollector() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceCollectorCreate,
 		Read:   resourceCollectorRead,
-		//Update: resourceCollectorUpdate,
-		//Delete: resourceCollectorDelete,
+		Update: resourceCollectorUpdate,
+		Delete: resourceCollectorDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -29,11 +30,20 @@ func resourceCollector() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"port": {
+			"username": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"agentName": {
+			"password": {
+				Type:      schema.TypeString,
+				Required:  true,
+				Sensitive: true,
+			},
+			"port": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
+			"agent_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -62,15 +72,15 @@ func createCollector(d *schema.ResourceData) client.Collector {
 		Name:      d.Get("name").(string),
 		Type:      d.Get("type").(string),
 		Hostname:  d.Get("hostname").(string),
-		Port:      d.Get("port").(string),
+		Port:      d.Get("port").(int),
 		Username:  d.Get("username").(string),
 		Password:  d.Get("password").(string),
-		AgentName: d.Get("agentName").(string),
+		AgentName: d.Get("agent_name").(string),
 	}
 	return collector
 }
 
-func resourceCollectorRead(d *schema.ResourceData, m interface{}) error {
+func resourceCollectorUpdate(d *schema.ResourceData, m interface{}) error {
 	appdClient := m.(*client.AppDClient)
 	applicationId := d.Get("application_id").(int)
 	id := d.Id()
@@ -88,4 +98,50 @@ func resourceCollectorRead(d *schema.ResourceData, m interface{}) error {
 	updateAction(d, *action)
 
 	return nil
+}
+
+func resourceCollectorRead(d *schema.ResourceData, m interface{}) error {
+	appdClient := m.(*client.AppDClient)
+	id := d.Id()
+
+	collectorID, err := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
+
+	collector, err := appdClient.GetCollector(collectorID)
+	if err != nil {
+		return err
+	}
+
+	updateCollector(d, *collector)
+
+	return nil
+}
+
+func resourceCollectorDelete(d *schema.ResourceData, m interface{}) error {
+	appdClient := m.(*client.AppDClient)
+	id := d.Id()
+
+	collectorID, err := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
+
+	err = appdClient.DeleteCollector(collectorID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func updateCollector(d *schema.ResourceData, collector client.Collector) {
+	d.Set("name", collector.Name)
+	d.Set("type", collector.Type)
+	d.Set("hostname", collector.Hostname)
+	d.Set("port", collector.Port)
+	d.Set("username", collector.Username)
+	d.Set("password", collector.Password)
+	d.Set("agent_name", collector.AgentName)
 }

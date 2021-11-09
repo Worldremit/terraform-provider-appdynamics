@@ -298,3 +298,46 @@ func configureConfig() string {
 					  default = %s
 					}`, os.Getenv("APPD_SECRET"), os.Getenv("APPD_CONTROLLER_BASE_URL"), os.Getenv("APPD_SCOPE_ID"), os.Getenv("APPD_APPLICATION_ID"))
 }
+
+func CheckCollectorDoesNotExist(resourceName string) func(state *terraform.State) error {
+	return func(state *terraform.State) error {
+		resourceState, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("not found: %s", resourceName)
+		}
+
+		id, err := strconv.Atoi(resourceState.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		_, err = appDClient.GetCollector(id)
+		if err == nil {
+			return fmt.Errorf("collector found, but should be removed : %d", id)
+		}
+
+		return nil
+	}
+}
+
+func CheckCollectorExists(resourceName string) func(state *terraform.State) error {
+	return func(state *terraform.State) error {
+
+		resourceState, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("not found: %s", resourceName)
+		}
+
+		id, err := strconv.Atoi(resourceState.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		_, err = appDClient.GetCollector(id)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
