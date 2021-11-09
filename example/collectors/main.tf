@@ -5,12 +5,22 @@ provider "appdynamics" {
 }
 
 resource appdynamics_collector test {
-	name="example3"
+	name="example2"
 	type="MYSQL"
 	hostname="test2"
 	username="user"
 	password="paswd3"
-	port=3306
+	port=17
+	agent_name="test"
+}
+
+resource appdynamics_collector test2 {
+	name="example1"
+	type="MYSQL"
+	hostname="test2"
+	username="u"
+	password="password2"
+	port=17
 	agent_name="test"
 }
 
