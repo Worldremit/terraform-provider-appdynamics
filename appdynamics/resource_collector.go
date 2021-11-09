@@ -82,21 +82,20 @@ func createCollector(d *schema.ResourceData) client.Collector {
 
 func resourceCollectorUpdate(d *schema.ResourceData, m interface{}) error {
 	appdClient := m.(*client.AppDClient)
-	id := d.Id()
 
-	actionId, err := strconv.Atoi(id)
+	collector := createCollector(d)
+	collectorId, err := strconv.Atoi(d.Id())
+	if err != nil {
+		return err
+	}
+	collector.ID = collectorId
+
+	_, err = appdClient.UpdateCollector(collector)
 	if err != nil {
 		return err
 	}
 
-	collector, err := appdClient.GetCollector(actionId)
-	if err != nil {
-		return err
-	}
-
-	updateCollector(d, *collector)
-
-	return nil
+	return resourceCollectorRead(d, m)
 }
 
 func resourceCollectorRead(d *schema.ResourceData, m interface{}) error {

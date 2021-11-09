@@ -43,7 +43,6 @@ func (c *AppDClient) CreateCollector(collector *Collector) (string, error) {
 	url := c.createCollectorUrl()
 	auth := c.createAuthHeader()
 	body := req.BodyJSON(collector)
-	req.Debug = true
 	resp, err := req.Post(url, auth, body)
 	if err != nil {
 		return "", err
@@ -72,22 +71,20 @@ func (c *AppDClient) DeleteCollector(collectorId int) error {
 	return nil
 }
 
-/*
-func (c *AppDClient) UpdateCollector(dashboard Dashboard) (*Dashboard, error) {
-	resp, err := req.Post(c.updateDashboardUrl(), c.createAuthHeader(), req.BodyJSON(dashboard))
+func (c *AppDClient) UpdateCollector(collector Collector) (*Collector, error) {
+	req.Debug = true
+	resp, err := req.Post(c.getCollectorUrl(collector.ID), c.createAuthHeader(), req.BodyJSON(collector))
 	if resp.Response().StatusCode != 200 {
 		respString, _ := resp.ToString()
-		return nil, errors.New(fmt.Sprintf("Error updating Dashboard: %d, %s", resp.Response().StatusCode, respString))
+		return nil, errors.New(fmt.Sprintf("Error updating Collector: %d, %s", resp.Response().StatusCode, respString))
 	}
-	updated := Dashboard{}
+	updated := Collector{}
 	err = resp.ToJSON(&updated)
 	if err != nil {
 		return nil, err
 	}
 	return &updated, err
 }
-
-*/
 
 func (c *AppDClient) GetCollector(collectorId int) (*Collector, error) {
 	resp, err := req.Get(c.getCollectorUrl(collectorId), c.createAuthHeader())
