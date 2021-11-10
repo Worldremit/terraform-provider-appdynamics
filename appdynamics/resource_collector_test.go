@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"os"
+	"strconv"
 	"testing"
 )
 
@@ -95,4 +96,47 @@ resource appdynamics_collector test {
 }`, appdSecret, appdControllerUrl, collectorName)
 
 	return tf
+}
+
+func CheckCollectorDoesNotExist(resourceName string) func(state *terraform.State) error {
+	return func(state *terraform.State) error {
+		resourceState, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("not found: %s", resourceName)
+		}
+
+		id, err := strconv.Atoi(resourceState.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		_, err = appDClient.GetCollector(id)
+		if err == nil {
+			return fmt.Errorf("collector found, but should be removed : %d", id)
+		}
+
+		return nil
+	}
+}
+
+func CheckCollectorExists(resourceName string) func(state *terraform.State) error {
+	return func(state *terraform.State) error {
+
+		resourceState, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("not found: %s", resourceName)
+		}
+
+		id, err := strconv.Atoi(resourceState.Primary.ID)
+		if err != nil {
+			return err
+		}
+
+		_, err = appDClient.GetCollector(id)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
 }
