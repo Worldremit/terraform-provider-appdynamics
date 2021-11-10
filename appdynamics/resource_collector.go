@@ -56,6 +56,11 @@ func resourceCollector() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 		},
 	}
 }
@@ -85,6 +90,7 @@ func createCollector(d *schema.ResourceData) client.Collector {
 		Username:  d.Get("username").(string),
 		Password:  d.Get("password").(string),
 		AgentName: d.Get("agent_name").(string),
+		Enabled:   d.Get("enabled").(bool),
 	}
 	return collector
 }
@@ -149,6 +155,7 @@ func updateCollector(d *schema.ResourceData, collector client.Collector) {
 	d.Set("hostname", collector.Hostname)
 	d.Set("port", collector.Port)
 	d.Set("username", collector.Username)
+	d.Set("enabled", collector.Enabled)
 	// Password is always set as `appdynamics_redacted_password` so we need to always overwrite this
 	//d.Set("password", collector.Password)
 	d.Set("agent_name", collector.AgentName)
