@@ -101,6 +101,5 @@ func (c *AppDClient) GetCollector(collectorId int) (*Collector, error) {
 	if err != nil {
 		return nil, err
 	}
-	collector.ID = collectorId //TODO Remove this line
 	return &collector, nil
 }

@@ -4,6 +4,8 @@ provider "appdynamics" {
   controller_base_url = var.controller_url
 }
 
+
+
 resource appdynamics_collector test {
 	name="example2"
 	type="MYSQL"

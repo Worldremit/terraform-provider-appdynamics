@@ -20,7 +20,6 @@ func TestCollector(t *testing.T) {
 		Secret:  secret,
 	}
 
-	// fmt.Println(client)
 	id, err := client.CreateCollector(&Collector{
 		Name:      "dummytest-2",
 		Type:      "MYSQL",
