@@ -69,7 +69,7 @@ func resourceCollectorCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	//TODO change it
+
 	d.SetId(id)
 
 	return nil
@@ -149,6 +149,7 @@ func updateCollector(d *schema.ResourceData, collector client.Collector) {
 	d.Set("hostname", collector.Hostname)
 	d.Set("port", collector.Port)
 	d.Set("username", collector.Username)
-	//d.Set("password", collector.Password) //TODO password is always set as `appdynamics_redacted_password` so we need to always overwrite this
+	// Password is always set as `appdynamics_redacted_password` so we need to always overwrite this
+	//d.Set("password", collector.Password)
 	d.Set("agent_name", collector.AgentName)
 }
