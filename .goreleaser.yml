@@ -17,7 +17,6 @@ builds:
     - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
   goos:
     - linux
-    - darwin
   goarch:
     - amd64
   ignore:
